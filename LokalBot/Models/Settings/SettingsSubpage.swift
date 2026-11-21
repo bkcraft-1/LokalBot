@@ -2,14 +2,14 @@ import Foundation
 
 enum SettingsSubpage: String, CaseIterable, Identifiable, Sendable {
     case autocompleteProfile, autocompleteExclusions, autocompleteUsage, autocompleteAdvanced
-    case dictationProfile, dictationRecent
+    case dictationProfile, dictationRecent, dictationCorrections
 
     var id: String { rawValue }
 
     var page: AppState.SettingsTab {
         switch self {
         case .autocompleteProfile, .autocompleteExclusions, .autocompleteUsage, .autocompleteAdvanced: .writing
-        case .dictationProfile, .dictationRecent: .dictation
+        case .dictationProfile, .dictationRecent, .dictationCorrections: .dictation
         }
     }
 
@@ -20,6 +20,7 @@ enum SettingsSubpage: String, CaseIterable, Identifiable, Sendable {
         case .autocompleteUsage: "Usage"
         case .autocompleteAdvanced: "Advanced"
         case .dictationRecent: "Recent dictations"
+        case .dictationCorrections: "Learned corrections"
         }
     }
 
@@ -39,6 +40,8 @@ enum SettingsSubpage: String, CaseIterable, Identifiable, Sendable {
             ["settings.dictationWritingProfile"]
         case .dictationRecent:
             []
+        case .dictationCorrections:
+            ["settings.dictationLearnFromCorrections"]
         }
     }
 

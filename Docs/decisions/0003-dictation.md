@@ -251,6 +251,12 @@ Learn from my dictation (`keepForLearning`) reads the pasted-into window's title
 
 Where: `LinuxWindows/crates/lokalbot-engine/src/dictation.rs` (`keep_for_learning`).
 
+### Corrections keep only word pairs, and a fix applies automatically only the second time
+
+Learn from my corrections reads the pasted-into field again within 30 seconds, under the paste check's rules and the dictation-learning exclusions, and compares it in memory with what was pasted (`DictationCorrection.pairs`). A replacement of one to three words counts only when the new words sound like the old ones and include a name or an uncommon word; digits, everyday-word swaps and rewrites of more than a third teach nothing, so an edit of meaning never becomes a swap. Only the pair is kept, encrypted. A corrected word joins the vocabulary hint at once, but replacing heard words is riskier, so a pair rewrites later transcripts only after the same fix has been made twice, never when the heard words are all everyday words (a fix of "Monday" must not rewrite every Monday), and a newer opposite fix replaces the older one.
+
+Where: `LokalBot/Dictation/DictationCorrection.swift` (`DictationCorrection.pairs`, `DictationCorrection.apply`), `LokalBot/Services/PersonalModel/DictationCorrectionsStore.swift` (`DictationCorrectionsStore.swaps`), `LokalBot/Dictation/DictationCoordinator.swift` (`DictationCoordinator.watchForCorrections`).
+
 ## Consequences
 
 - Speech that is not a writing request stays data for a cleanup-only prompt; a change to routing, the cleanup prompt or the window-text policy needs a rerun of the replay benchmarks in `Benchmarks/transcribe/Dictation/results/`, and every path that rejects or fails a composition must still keep the transcript.

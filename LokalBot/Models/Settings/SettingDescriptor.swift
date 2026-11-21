@@ -232,6 +232,7 @@ struct SettingDescriptor: Identifiable {
         .init(id: "settings.dictationUseScreenContext", title: "Use the focused window as context", category: .dictation, aliases: "dictation compose screenshot screen recording ocr window", label: "The focused window"),
         .init(id: "settings.dictationWritingProfile", title: "Writing profile", category: .dictation, aliases: "dictation compose tone name style terminology"),
         .init(id: "settings.dictationUseVisibleContext", title: "Use visible text above the field", category: .dictation, aliases: "dictation compose screen context messages accessibility", label: "Text above where you type"),
+        .init(id: "settings.dictationLearnFromCorrections", title: "Learn from my corrections", category: .dictation, aliases: "dictation corrections misheard fix words swaps vocabulary spelling"),
         .init(id: "settings.dictationUseMeetingMemory", title: "Use meeting and work memory", category: .dictation, aliases: "dictation compose saved facts notes context", label: "Facts from your meetings"),
         .init(id: "settings.dictationUseScreenMemory", title: "Use screen-derived work memory", category: .dictation, aliases: "dictation compose saved screen facts context", label: "Facts from your screen history"),
         .init(id: "settings.models", title: "Configured models", category: .models, aliases: "transcribe think autocomplete LLM backend download ollama openai"),

@@ -74,6 +74,9 @@ final class DictationCoordinator: ObservableObject {
     private let onMicPermissionDenied: () -> Void
     private let onDictatedForLearning: (_ spokenText: String, _ appName: String) -> Void
     private var learningReadTask: Task<Void, Never>?
+    private var correctionWatchTask: Task<Void, Never>?
+    private let correctionSwaps: () -> [DictationCorrectionPair]
+    private let onCorrections: ([DictationCorrectionPair]) -> Void
     private let focusSnapshotExecutor: DictationFocusSnapshotExecutor
     private let recorder: MicRecorder
     private let inputMonitor = DictationInputMonitor()
@@ -120,6 +123,8 @@ final class DictationCoordinator: ObservableObject {
         onError: @escaping (String) -> Void,
         onMicPermissionDenied: @escaping () -> Void = {},
         onDictatedForLearning: @escaping (_ spokenText: String, _ appName: String) -> Void = { _, _ in },
+        correctionSwaps: @escaping () -> [DictationCorrectionPair] = { [] },
+        onCorrections: @escaping ([DictationCorrectionPair]) -> Void = { _ in },
         focusSnapshotExecutor: DictationFocusSnapshotExecutor = .shared,
         memoryContextProvider: @escaping (CotypingField, AppSettings) async -> CotypingMemoryContextProvider.Snapshot = { _, _ in .empty },
         screenContextProvider: @escaping (
@@ -148,6 +153,8 @@ final class DictationCoordinator: ObservableObject {
         self.onError = onError
         self.onMicPermissionDenied = onMicPermissionDenied
         self.onDictatedForLearning = onDictatedForLearning
+        self.correctionSwaps = correctionSwaps
+        self.onCorrections = onCorrections
         self.focusSnapshotExecutor = focusSnapshotExecutor
         inputMonitor.triggerModeProvider = { [weak self] in
             self?.settingsProvider().dictationTriggerMode ?? .pushToTalk
@@ -680,8 +687,11 @@ final class DictationCoordinator: ObservableObject {
             try Task.checkCancellation()
             guard generation == session else { return }
 
-            let spokenText = Transcript.normalizedText(
+            let heardText = Transcript.normalizedText(
                 transcript.segments.map(\.displayText).joined(separator: " "))
+            let swapped = DictationCorrection.apply(correctionSwaps(), to: heardText)
+            if swapped.count > 0 { lokalbotLog("dictation applied learned corrections count=\(swapped.count)") }
+            let spokenText = swapped.text
             guard !spokenText.isEmpty else {
                 completeWithMessage("No speech detected.", notice: .noSpeech)
                 return
@@ -739,6 +749,7 @@ final class DictationCoordinator: ObservableObject {
                 if let insertedInto {
                     checkInsertion(of: text, into: insertedInto, excludedApps: config.excludedAppList)
                     keepForLearning(spokenText, into: insertedInto)
+                    watchForCorrections(of: text, into: insertedInto)
                 }
             case .copied, .displayed:
                 break
@@ -935,6 +946,45 @@ final class DictationCoordinator: ObservableObject {
                 excludedApps: settings.excludedAppList,
                 excludedDomains: settings.excludedScreenDomainList) else { return }
             self.onDictatedForLearning(spokenText, appName)
+        }
+    }
+
+    private func watchForCorrections(of text: String, into target: DictationDeliveryTarget) {
+        correctionWatchTask?.cancel()
+        guard settingsStore.current.dictationLearnFromCorrections, target.focusIdentityKey?.isEmpty == false else { return }
+        let appName = NSRunningApplication(processIdentifier: target.processID)?.localizedName ?? ""
+        correctionWatchTask = Task { [weak self] in
+            guard let surface = await Self.readLearningSurface(in: target), !Task.isCancelled, let self else { return }
+            let settings = self.settingsStore.current
+            guard settings.dictationLearnFromCorrections, DictationLearningPolicy.permits(
+                appName: appName, bundleID: target.bundleID, surface: surface,
+                excludedApps: settings.excludedAppList,
+                excludedDomains: settings.excludedScreenDomainList) else { return }
+            var lastRead: String?
+            var waited = 0.0
+            for delay in DictationCorrection.readDelaysSeconds {
+                try? await Task.sleep(for: .seconds(delay - waited))
+                waited = delay
+                guard !Task.isCancelled else { return }
+                guard let read = await Self.readFieldText(in: target),
+                      DictationCorrection.spanFound(inserted: text, fieldText: read) else { break }
+                lastRead = read
+            }
+            guard let lastRead, self.settingsStore.current.dictationLearnFromCorrections else { return }
+            let pairs = DictationCorrection.pairs(
+                inserted: text, fieldText: lastRead, isEverydayWord: { DictationCorrection.isEverydayEnglishWord($0) })
+            guard !pairs.isEmpty else { return }
+            lokalbotLog("dictation learned corrections count=\(pairs.count)")
+            self.onCorrections(pairs)
+        }
+    }
+
+    nonisolated private static func readFieldText(in target: DictationDeliveryTarget) async -> String? {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .utility).async {
+                continuation.resume(returning: CotypingAXHelper.dictationFieldText(
+                    processID: target.processID, focusIdentityKey: target.focusIdentityKey))
+            }
         }
     }
 

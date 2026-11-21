@@ -208,6 +208,7 @@ struct AppSettings: Codable, Equatable {
     var dictationIntent: DictationIntent = .transcribe
     var dictationUseScreenContext = false
     var dictationUseVisibleContext = false
+    var dictationLearnFromCorrections = false
     var dictationUseMeetingMemory = false
     var dictationUseScreenMemory = false
     var dictationTriggerMode: DictationTriggerMode = .pushToTalk
@@ -679,6 +680,7 @@ struct AppSettings: Codable, Equatable {
         case dictationEnabled
         case dictationIntent, dictationUseScreenContext
         case dictationUseVisibleContext, dictationUseMeetingMemory, dictationUseScreenMemory
+        case dictationLearnFromCorrections
         case dictationTriggerMode
         case dictationShortcut
         case dictationOutputMode
@@ -899,6 +901,7 @@ struct AppSettings: Codable, Equatable {
         try c.encode(dictationIntent, forKey: .dictationIntent)
         try c.encode(dictationUseScreenContext, forKey: .dictationUseScreenContext)
         try c.encode(dictationUseVisibleContext, forKey: .dictationUseVisibleContext)
+        try c.encode(dictationLearnFromCorrections, forKey: .dictationLearnFromCorrections)
         try c.encode(dictationUseMeetingMemory, forKey: .dictationUseMeetingMemory)
         try c.encode(dictationUseScreenMemory, forKey: .dictationUseScreenMemory)
         try c.encode(dictationTriggerMode, forKey: .dictationTriggerMode)
@@ -1108,6 +1111,7 @@ struct AppSettings: Codable, Equatable {
         dictationIntent = decode(.dictationIntent, .compose)
         dictationUseScreenContext = decode(.dictationUseScreenContext, true)
         dictationUseVisibleContext = decode(.dictationUseVisibleContext, false)
+        dictationLearnFromCorrections = decode(.dictationLearnFromCorrections, false)
         dictationUseMeetingMemory = decode(.dictationUseMeetingMemory, false)
         dictationUseScreenMemory = decode(.dictationUseScreenMemory, false)
         dictationTriggerMode = decode(.dictationTriggerMode, defaults.dictationTriggerMode)
