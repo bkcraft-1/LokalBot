@@ -69,6 +69,15 @@ final class DictationCorrectionTests: XCTestCase {
         XCTAssertFalse(DictationCorrection.spanFound(inserted: "Send it to Mila Novack today", fieldText: "a later paragraph only"))
     }
 
+    func testCorrectedWordsComeFirstInsideTheSameHintLimits() {
+        let known = (0..<TranscriptionVocabulary.maximumTerms).map { "Name\($0)" }
+        let terms = DictationCorrection.hintTerms(corrected: ["Kubernetes", "name3"], known: known)
+        XCTAssertEqual(terms.count, TranscriptionVocabulary.maximumTerms)
+        XCTAssertEqual(Array(terms.prefix(3)), ["Kubernetes", "name3", "Name0"])
+        XCTAssertFalse(terms.contains("Name3"), "listed once")
+        XCTAssertLessThanOrEqual(terms.map { $0.count + 2 }.reduce(0, +), TranscriptionVocabulary.maximumCharacters)
+    }
+
     func testSoundKeyFoldsCommonRespellings() {
         XCTAssertEqual(DictationCorrection.sound("novack"), DictationCorrection.sound("novak"))
         XCTAssertEqual(DictationCorrection.sound("jon"), DictationCorrection.sound("john"))

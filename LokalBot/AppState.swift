@@ -2289,7 +2289,8 @@ final class AppState: ObservableObject {
         guard base.autoTranscriptionVocabulary else {
             guard !corrected.isEmpty else { return base }
             var settings = base
-            settings.transcriptionPrompt = TranscriptionVocabulary.prompt(manual: base.transcriptionPrompt, terms: corrected)
+            settings.transcriptionPrompt = TranscriptionVocabulary.prompt(
+                manual: base.transcriptionPrompt, terms: DictationCorrection.hintTerms(corrected: corrected, known: []))
             return settings
         }
         let dayKey = DreamDay.key(for: Date())
@@ -2304,9 +2305,8 @@ final class AppState: ObservableObject {
             dictationVocabularyCache = (key, terms)
         }
         var settings = base
-        let correctedKeys = Set(corrected.map { $0.lowercased() })
         settings.transcriptionPrompt = TranscriptionVocabulary.prompt(
-            manual: base.transcriptionPrompt, terms: corrected + terms.filter { !correctedKeys.contains($0.lowercased()) })
+            manual: base.transcriptionPrompt, terms: DictationCorrection.hintTerms(corrected: corrected, known: terms))
         return settings
     }
 

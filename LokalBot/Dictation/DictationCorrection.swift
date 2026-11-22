@@ -44,6 +44,19 @@ enum DictationCorrection {
         return found
     }
 
+    static func hintTerms(corrected: [String], known: [String]) -> [String] {
+        var seen = Set<String>()
+        var result: [String] = []
+        var characters = 0
+        for term in corrected + known where seen.insert(term.lowercased()).inserted {
+            guard result.count < TranscriptionVocabulary.maximumTerms,
+                  characters + term.count + 2 <= TranscriptionVocabulary.maximumCharacters else { break }
+            result.append(term)
+            characters += term.count + 2
+        }
+        return result
+    }
+
     static func spanFound(inserted: String, fieldText: String) -> Bool {
         let sent = words(inserted)
         guard !sent.isEmpty else { return false }
