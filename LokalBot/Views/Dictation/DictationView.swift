@@ -18,6 +18,9 @@ struct DictationSettingsSections: View {
             switch subpage {
             case .dictationProfile: profileSection
             case .dictationRecent: recentSection
+            case .dictationCorrections:
+                LearnedCorrectionsSection(isOn: $app.settings.dictationLearnFromCorrections,
+                                          store: app.dictationCorrections, focusedSettingID: app.focusedSettingID)
             default: mainSections
             }
         }
@@ -47,6 +50,11 @@ struct DictationSettingsSections: View {
                              value: dictation.history.entries.isEmpty
                                 ? localized("None yet") : String(dictation.history.entries.count),
                              identifier: "settings.dictation.recent") { open(.dictationRecent) }
+            SettingsDrillRow(title: "Learned corrections",
+                             detail: "Fixes to misheard words",
+                             value: app.settings.dictationLearnFromCorrections
+                                ? String(app.dictationCorrections.corrections.count) : localized("Off"),
+                             identifier: "settings.dictation.corrections") { open(.dictationCorrections) }
         }
     }
 

@@ -2646,3 +2646,9 @@
 "Choose Wispr Flow's flow.sqlite. LokalBot reads only its dictionary." = "Pilih flow.sqlite milik Wispr Flow. LokalBot hanya membaca kamusnya.";
 "Wispr Flow's dictionary has no new words to add." = "Kamus Wispr Flow tidak punya kata baru untuk ditambahkan.";
 "Couldn't read Wispr Flow's dictionary." = "Tidak dapat membaca kamus Wispr Flow.";
+"Learned corrections" = "Koreksi yang dipelajari";
+"Fixes to misheard words" = "Perbaikan kata yang salah dengar";
+"Learn from my corrections" = "Belajar dari koreksi saya";
+"When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "Saat Anda memperbaiki kata yang salah dengar tepat setelah mendikte, di kolom yang sama, LokalBot mengingat perbaikan itu. Hanya pasangan kata yang disimpan, terenkripsi di Mac ini. Kata yang Anda perbaiki membantu transkripsi berikutnya; perbaikan yang Anda lakukan dua kali diterapkan otomatis. Aplikasi dan situs web yang dikecualikan, jendela pribadi, dan kolom kata sandi dilewati. Mematikan ini akan menghapusnya.";
+"No corrections learned yet." = "Belum ada koreksi yang dipelajari.";
+"Forget all corrections" = "Lupakan semua koreksi";

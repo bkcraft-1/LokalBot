@@ -2646,3 +2646,9 @@
 "Choose Wispr Flow's flow.sqlite. LokalBot reads only its dictionary." = "Wispr Flow의 flow.sqlite를 선택하세요. LokalBot은 사전만 읽습니다.";
 "Wispr Flow's dictionary has no new words to add." = "Wispr Flow 사전에 추가할 새 단어가 없습니다.";
 "Couldn't read Wispr Flow's dictionary." = "Wispr Flow 사전을 읽을 수 없습니다.";
+"Learned corrections" = "학습한 수정 사항";
+"Fixes to misheard words" = "잘못 인식된 단어 수정";
+"Learn from my corrections" = "내 수정 사항에서 학습";
+"When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "받아쓰기 직후 같은 필드에서 잘못 인식된 단어를 고치면 LokalBot이 그 수정을 기억합니다. 단어 쌍만 이 Mac에 암호화되어 저장됩니다. 고친 단어는 다음 전사에 도움이 되고, 두 번 고친 내용은 자동으로 적용됩니다. 제외한 앱과 웹사이트, 비공개 창, 암호 입력란은 건너뜁니다. 끄면 삭제됩니다.";
+"No corrections learned yet." = "아직 학습한 수정 사항이 없습니다.";
+"Forget all corrections" = "모든 수정 사항 지우기";

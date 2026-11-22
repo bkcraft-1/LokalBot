@@ -289,6 +289,9 @@ final class AppState: ObservableObject {
                 if settings.learnsFromDictation != oldValue.learnsFromDictation {
                     applyDictationLearningSetting()
                 }
+                if oldValue.dictationLearnFromCorrections, !settings.dictationLearnFromCorrections {
+                    dictationCorrections.forgetAll()
+                }
                 if Self.companionChanged(from: oldValue, to: settings) {
                     applyCompanionSetting()
                 }
@@ -998,6 +1001,12 @@ final class AppState: ObservableObject {
             self?.micRecoveryNeeded = true
         }, onDictatedForLearning: { [weak self] spokenText, appName in
             self?.keepDictationForLearning(spokenText, appName: appName)
+        }, correctionSwaps: { [weak self] in
+            guard let self, self.settings.dictationLearnFromCorrections else { return [] }
+            return self.dictationCorrections.swaps
+        }, onCorrections: { [weak self] pairs in
+            guard let self, self.settings.dictationLearnFromCorrections else { return }
+            self.dictationCorrections.record(pairs)
         }, memoryContextProvider: { [weak self] field, settings in
             guard let self, self.libraryReady else { return .empty }
             let root = self.storage.rootURL
@@ -1205,6 +1214,7 @@ final class AppState: ObservableObject {
     }
 
     private(set) lazy var dictationLearningLog = DictationLearningLog(root: storage.rootURL)
+    private(set) lazy var dictationCorrections = DictationCorrectionsStore(storageRoot: storage.rootURL)
 
     private(set) lazy var personalModel: PersonalModelController = {
         let controller = PersonalModelController(
@@ -1521,6 +1531,7 @@ final class AppState: ObservableObject {
         applyMemoryRoutineSetting()
         applyDreamingSetting()
         applyDictationLearningSetting()
+        if settings.dictationLearnFromCorrections { dictationCorrections.load() }
         applyHealthCheckSetting()
         if headlessCommand == nil, !Self.isUITesting { email.start() }
         bindBackgroundActivity()
@@ -2272,8 +2283,16 @@ final class AppState: ObservableObject {
     private var dictationVocabularyCache: (key: String, terms: [String])?
 
     func dictationTranscriptionSettings(_ base: AppSettings) -> AppSettings {
-        guard base.autoTranscriptionVocabulary,
-              base.transcriptionModel.acceptsVocabularyPrompt else { return base }
+        let corrected = base.dictationLearnFromCorrections
+            ? dictationCorrections.vocabularyTerms(limit: DictationCorrection.maxVocabularyTerms) : []
+        guard base.transcriptionModel.acceptsVocabularyPrompt else { return base }
+        guard base.autoTranscriptionVocabulary else {
+            guard !corrected.isEmpty else { return base }
+            var settings = base
+            settings.transcriptionPrompt = TranscriptionVocabulary.prompt(
+                manual: base.transcriptionPrompt, terms: DictationCorrection.hintTerms(corrected: corrected, known: []))
+            return settings
+        }
         let dayKey = DreamDay.key(for: Date())
         let key = "\(dayKey)|\(meetings.count)|\(meetings.map(\.startedAt).max()?.timeIntervalSince1970 ?? 0)"
         let terms: [String]
@@ -2287,7 +2306,7 @@ final class AppState: ObservableObject {
         }
         var settings = base
         settings.transcriptionPrompt = TranscriptionVocabulary.prompt(
-            manual: base.transcriptionPrompt, terms: terms)
+            manual: base.transcriptionPrompt, terms: DictationCorrection.hintTerms(corrected: corrected, known: terms))
         return settings
     }
 

@@ -220,6 +220,15 @@ enum CotypingAXHelper {
     }
 
     static func dictationTextBeforeCaret(processID: pid_t, focusIdentityKey: String?) -> String? {
+        boundDictationField(processID: processID, focusIdentityKey: focusIdentityKey)?.precedingText
+    }
+
+    static func dictationFieldText(processID: pid_t, focusIdentityKey: String?) -> String? {
+        boundDictationField(processID: processID, focusIdentityKey: focusIdentityKey)
+            .map { $0.precedingText + $0.trailingText }
+    }
+
+    private static func boundDictationField(processID: pid_t, focusIdentityKey: String?) -> BoundedAcceptanceContent? {
         guard isTrusted, processID > 0, processID != ProcessInfo.processInfo.processIdentifier,
               let focusIdentityKey, !focusIdentityKey.isEmpty else { return nil }
         let deadline = DispatchTime.now().uptimeNanoseconds &+ 250 * 1_000_000
@@ -241,7 +250,7 @@ enum CotypingAXHelper {
             role: role, subrole: subrole)
         guard withinDeadline(), DictationInsertionCheck.allowsReadBack(
             boundIdentity: focusIdentityKey, liveIdentity: liveIdentity, isSecure: isSecure) else { return nil }
-        return boundedAcceptanceContent(on: element, withinDeadline: withinDeadline)?.precedingText
+        return boundedAcceptanceContent(on: element, withinDeadline: withinDeadline)
     }
 
     static func dictationLearningSurface(processID: pid_t, focusIdentityKey: String?) -> DictationLearningSurface? {

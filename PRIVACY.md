@@ -70,7 +70,9 @@ app names and duration totals remain. Saved moments remain until you unsave or d
 audio is deleted after transcription by default. Dictated text is kept only as
 the last 10 results for 7 days, encrypted, so you can copy one again (see
 **Recent dictations** below), and briefly for learning while **Learn from my
-dictation** is on (see About you below). You can delete an individual
+dictation** is on (see About you below). With **Learn from my corrections** on,
+only pairs of misheard and corrected words are kept (see **Learn from my
+corrections** below). You can delete an individual
 meeting in the app or remove the entire LokalBot Application Support directory.
 
 **Imported recordings.** When you drop an audio or video file onto Meetings or
@@ -1438,6 +1440,31 @@ to the drive after each dictation so a crash or power cut doesn't lose them.
 A result older than 7 days is dropped when LokalBot starts or saves the next
 dictation, and any beyond the newest 10 right away; **Clear** deletes the file. They are never logged or sent anywhere. Text meant
 for a password field is never kept.
+
+**Learn from my corrections** (Settings → Dictation → Learned corrections) is
+off by default. While it is on, after a paste lands LokalBot reads the same
+field up to three more times within 30 seconds, under the same rules as the
+paste check (the exact field, never a secure field, the bounded text around the
+caret) plus the exclusions of **Learn from my dictation**: apps and websites on
+the shared exclusion lists, private windows, and LokalBot itself are skipped,
+and it stops reading once that field loses focus or no longer holds the
+dictation. The reads are compared in
+memory with what was pasted and discarded. When you replaced one to three
+misheard words with a sound-alike that is a name or an uncommon word, only that
+pair is kept, for example "cooper netties → Kubernetes", with how often you
+made it and when; never the dictation, the field's text, the app or the page.
+Edits that change digits, swap one everyday word for another, or rewrite more
+than a third of the dictation are not kept. The pairs are saved in the library
+folder as `dictation-corrections.enc`, AES-GCM encrypted with a key kept in the
+Keychain (`dictation-corrections-key`), readable only by your account (0600):
+at most 200, each dropped after 180 days without use. A corrected word is added
+to the transcription vocabulary hint, and a fix made twice replaces the misheard
+words in later transcripts before cleanup, unless the misheard words are everyday
+words, which are never rewritten everywhere (a newer opposite fix replaces an
+older one); if you use a remote transcription
+server, corrected words reach it in the vocabulary hint, as your own vocabulary
+already does. Each pair can be deleted on the Learned corrections page;
+**Forget all corrections** or turning the setting off deletes the file.
 
 Selection actions are off by default (Settings → Ask). When
 enabled, pressing their shortcut reads the text selected in the frontmost app

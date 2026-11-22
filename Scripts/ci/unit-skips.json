@@ -221,6 +221,12 @@
       "tests": [
         "CaptureReplayTests/testScriptedBrowserTracesReplayToACapture"
       ]
+    },
+    {
+      "reason": "Counts the corrections DictationCorrection.pairs finds in exported edits (LOKALBOT_CORRECTIONS_PAIRS, a JSON list of {inserted, field}; LOKALBOT_CORRECTIONS_OUT to save the pairs). A measurement, run by hand.",
+      "tests": [
+        "DictationCorrectionRealDataTests/testCountsTheCorrectionsFoundInExportedEdits"
+      ]
     }
   ]
 }

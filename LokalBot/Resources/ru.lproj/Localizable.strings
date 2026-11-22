@@ -2646,3 +2646,9 @@
 "Choose Wispr Flow's flow.sqlite. LokalBot reads only its dictionary." = "Выберите файл flow.sqlite из Wispr Flow. LokalBot читает только его словарь.";
 "Wispr Flow's dictionary has no new words to add." = "В словаре Wispr Flow нет новых слов для добавления.";
 "Couldn't read Wispr Flow's dictionary." = "Не удалось прочитать словарь Wispr Flow.";
+"Learned corrections" = "Выученные исправления";
+"Fixes to misheard words" = "Исправления неверно распознанных слов";
+"Learn from my corrections" = "Учиться на моих исправлениях";
+"When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "Когда вы исправляете неверно распознанное слово сразу после диктовки в том же поле, LokalBot запоминает исправление. Хранятся только пары слов, в зашифрованном виде на этом Mac. Исправленное слово помогает при следующей расшифровке; исправление, сделанное дважды, применяется автоматически. Исключённые приложения и сайты, приватные окна и поля паролей пропускаются. При выключении они удаляются.";
+"No corrections learned yet." = "Исправлений пока нет.";
+"Forget all corrections" = "Забыть все исправления";

@@ -2646,3 +2646,9 @@
 "Choose Wispr Flow's flow.sqlite. LokalBot reads only its dictionary." = "Chọn tệp flow.sqlite của Wispr Flow. LokalBot chỉ đọc từ điển của nó.";
 "Wispr Flow's dictionary has no new words to add." = "Từ điển Wispr Flow không có từ mới nào để thêm.";
 "Couldn't read Wispr Flow's dictionary." = "Không thể đọc từ điển Wispr Flow.";
+"Learned corrections" = "Sửa lỗi đã học";
+"Fixes to misheard words" = "Sửa các từ bị nghe nhầm";
+"Learn from my corrections" = "Học từ các lần sửa của tôi";
+"When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "Khi bạn sửa một từ bị nghe nhầm ngay sau khi đọc chính tả, trong cùng ô nhập, LokalBot sẽ ghi nhớ cách sửa đó. Chỉ các cặp từ được lưu, mã hóa trên máy Mac này. Từ bạn đã sửa giúp lần chép lời tiếp theo; cách sửa bạn làm hai lần sẽ được áp dụng tự động. Các ứng dụng và trang web bị loại trừ, cửa sổ riêng tư và ô mật khẩu sẽ bị bỏ qua. Tắt mục này sẽ xóa chúng.";
+"No corrections learned yet." = "Chưa học được lần sửa nào.";
+"Forget all corrections" = "Quên tất cả các lần sửa";

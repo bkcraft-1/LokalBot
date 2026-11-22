@@ -2645,3 +2645,9 @@
 "Choose Wispr Flow's flow.sqlite. LokalBot reads only its dictionary." = "Choose Wispr Flow's flow.sqlite. LokalBot reads only its dictionary.";
 "Wispr Flow's dictionary has no new words to add." = "Wispr Flow's dictionary has no new words to add.";
 "Couldn't read Wispr Flow's dictionary." = "Couldn't read Wispr Flow's dictionary.";
+"Learned corrections" = "Learned corrections";
+"Fixes to misheard words" = "Fixes to misheard words";
+"Learn from my corrections" = "Learn from my corrections";
+"When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them.";
+"No corrections learned yet." = "No corrections learned yet.";
+"Forget all corrections" = "Forget all corrections";
