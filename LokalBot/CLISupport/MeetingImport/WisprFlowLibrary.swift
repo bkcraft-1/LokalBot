@@ -25,6 +25,14 @@ enum WisprFlowLibrary {
         var isTourDemo = false
     }
 
+    struct DictationEdit: Equatable, Sendable {
+        var pasted: String
+        var edited: String
+        var bundleID: String?
+        var pageURL: String?
+        var date: Date?
+    }
+
     static let defaultLocation = "~/Library/Application Support/Wispr Flow/flow.sqlite"
     static let databaseName = "flow.sqlite"
 
@@ -80,6 +88,48 @@ enum WisprFlowLibrary {
                 isDeleted: flag(row["isdeleted"]),
                 isTourDemo: flag(row["istourdemo"]))
         }
+    }
+
+    static func dictationEdits(at picked: URL) throws -> [DictationEdit] {
+        let database = try open(picked, requiring: "history")
+        guard database.hasColumns("History", ["editedText", "formattedText"]) else {
+            throw ExternalImportError.unreadable(databaseURL(for: picked).path, "its dictation history has changed")
+        }
+        let wanted = ["pastedText", "formattedText", "editedText", "app", "url", "timestamp"]
+        let formatter = historyDateFormatter()
+        return database.records("History", wanted).compactMap { row in
+            guard let edited = row["editedtext"] as? String, !edited.isEmpty,
+                  let pasted = (row["pastedtext"] as? String).flatMap({ $0.isEmpty ? nil : $0 })
+                    ?? (row["formattedtext"] as? String),
+                  !pasted.isEmpty, edited != pasted else { return nil }
+            return DictationEdit(
+                pasted: pasted, edited: edited,
+                bundleID: (row["app"] as? String).flatMap { $0.isEmpty ? nil : $0 },
+                pageURL: (row["url"] as? String).flatMap(pageAddress),
+                date: (row["timestamp"] as? String).flatMap { historyDate($0, formatter: formatter) })
+        }
+        .sorted { ($0.date ?? .distantPast) < ($1.date ?? .distantPast) }
+    }
+
+    static func pageAddress(_ stored: String) -> String? {
+        let value = stored.trimmingCharacters(in: .whitespacesAndNewlines)
+        if value.contains("://") { return value }
+        guard value.contains("."), !value.contains(where: \.isWhitespace) else { return nil }
+        return "https://" + value
+    }
+
+    static func historyDate(_ text: String, formatter: DateFormatter = historyDateFormatter()) -> Date? {
+        for format in ["yyyy-MM-dd HH:mm:ss.SSS ZZZZZ", "yyyy-MM-dd HH:mm:ss ZZZZZ", "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"] {
+            formatter.dateFormat = format
+            if let date = formatter.date(from: text) { return date }
+        }
+        return nil
+    }
+
+    static func historyDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
     }
 
     private static func open(_ picked: URL, requiring table: String) throws -> WisprFlowDatabase {
@@ -164,6 +214,11 @@ private final class WisprFlowDatabase {
 
     func tables() -> Set<String> {
         Set(rows("SELECT name FROM sqlite_master WHERE type = 'table'").compactMap { ($0["name"] as? String)?.lowercased() })
+    }
+
+    func hasColumns(_ table: String, _ names: [String]) -> Bool {
+        let present = Set(rows("PRAGMA table_info(\(quoted(table)))").compactMap { ($0["name"] as? String)?.lowercased() })
+        return names.allSatisfy { present.contains($0.lowercased()) }
     }
 
     func records(_ table: String, _ wanted: [String]) -> [[String: Any]] {

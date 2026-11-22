@@ -2652,3 +2652,9 @@
 "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "Idan ka gyara kalmar da aka ji ba daidai ba nan da nan bayan furtawa, a filin guda, LokalBot zai tuna da gyaran. Kalmomi biyu-biyu kawai ake ajiyewa, a ɓoye a wannan Mac ɗin. Kalmar da ka gyara tana taimaka wa rubutun na gaba; gyaran da ka yi sau biyu ana amfani da shi kai tsaye. Ana tsallake manhajoji da shafukan yanar gizo da aka cire, tagogi na sirri, da filayen kalmar sirri. Kashe wannan zai goge su.";
 "No corrections learned yet." = "Har yanzu ba a koyi wani gyara ba.";
 "Forget all corrections" = "Manta da duk gyare-gyare";
+"Add %lld corrections from Wispr Flow?" = "A ƙara gyare-gyare %lld daga Wispr Flow?";
+"Add Corrections" = "Ƙara gyare-gyare";
+"Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out." = "Gyare-gyaren da ka yi fiye da sau ɗaya a Wispr Flow za a riƙa amfani da su kai tsaye daga yanzu. Ana adana nau'ikan kalmomi kawai; ana barin gyare-gyaren da suka wuce kwanaki 180 da rubutun murya a manhajoji ko shafukan yanar gizo da aka ware.";
+"Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there." = "Zaɓi flow.sqlite na Wispr Flow. LokalBot yana karanta rubutun murya da ka gyara a can kawai.";
+"Wispr Flow's history has no corrections to add." = "Tarihin Wispr Flow ba shi da gyare-gyaren da za a ƙara.";
+"Couldn't read Wispr Flow's history." = "Ba a iya karanta tarihin Wispr Flow ba.";

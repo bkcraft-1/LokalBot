@@ -2651,3 +2651,9 @@
 "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them.";
 "No corrections learned yet." = "No corrections learned yet.";
 "Forget all corrections" = "Forget all corrections";
+"Add %lld corrections from Wispr Flow?" = "Add %lld corrections from Wispr Flow?";
+"Add Corrections" = "Add Corrections";
+"Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out." = "Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out.";
+"Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there." = "Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there.";
+"Wispr Flow's history has no corrections to add." = "Wispr Flow's history has no corrections to add.";
+"Couldn't read Wispr Flow's history." = "Couldn't read Wispr Flow's history.";

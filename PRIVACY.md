@@ -1466,6 +1466,21 @@ server, corrected words reach it in the vocabulary hint, as your own vocabulary
 already does. Each pair can be deleted on the Learned corrections page;
 **Forget all corrections** or turning the setting off deletes the file.
 
+**Corrections imported from Wispr Flow.** With **Learn from my corrections** on
+and Wispr Flow installed, **Import from Wispr Flow** on the Learned corrections
+page reads the dictation history in the Wispr Flow database you choose
+(`flow.sqlite`), opened read-only as for the dictionary import: for each
+dictation you edited there, what Wispr Flow pasted, your edited text, the app,
+the page address and the time. They are compared in memory by the same rule as
+live corrections, and after you confirm only the pairs are kept, each with the
+date you made the fix, in the same file; nothing else from Wispr Flow is kept,
+and the log records only counts. Dictations older than 180 days, in apps or on
+websites on the shared exclusion lists, and in a browser without a page address
+are left out; Wispr Flow keeps only a page's host, and the website exclusions
+are checked against it. Wispr Flow doesn't record window titles, so dictations in private
+windows can't be told apart. A fix you made in two or more dictations there is
+applied automatically from then on, under the same everyday-word rule.
+
 Selection actions are off by default (Settings → Ask). When
 enabled, pressing their shortcut reads the text selected in the frontmost app
 once, through Accessibility. Apps on the shared exclusion list and secure

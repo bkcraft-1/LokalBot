@@ -2652,3 +2652,9 @@
 "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "在聽寫後立即於同一欄位中更正聽錯的字詞時，LokalBot 會記住這次更正。只會儲存字詞配對，並在這台 Mac 上加密。更正過的字詞有助於下一次轉寫；同一更正做過兩次後會自動套用。已排除的 App 和網站、私密視窗和密碼欄位會被略過。關閉此項會刪除它們。";
 "No corrections learned yet." = "尚未學習任何更正。";
 "Forget all corrections" = "忘記所有更正";
+"Add %lld corrections from Wispr Flow?" = "要從 Wispr Flow 加入 %lld 項更正嗎？";
+"Add Corrections" = "加入更正";
+"Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out." = "你在 Wispr Flow 中做過不只一次的更正，今後會自動套用。只保留詞語對；超過 180 天的更正以及在已排除的 App 或網站中的聽寫不會匯入。";
+"Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there." = "選擇 Wispr Flow 的 flow.sqlite。LokalBot 只讀取你在其中編輯過的聽寫。";
+"Wispr Flow's history has no corrections to add." = "Wispr Flow 的歷史記錄中沒有可加入的更正。";
+"Couldn't read Wispr Flow's history." = "無法讀取 Wispr Flow 的歷史記錄。";

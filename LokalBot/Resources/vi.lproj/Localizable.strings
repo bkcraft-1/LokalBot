@@ -2652,3 +2652,9 @@
 "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "Khi bạn sửa một từ bị nghe nhầm ngay sau khi đọc chính tả, trong cùng ô nhập, LokalBot sẽ ghi nhớ cách sửa đó. Chỉ các cặp từ được lưu, mã hóa trên máy Mac này. Từ bạn đã sửa giúp lần chép lời tiếp theo; cách sửa bạn làm hai lần sẽ được áp dụng tự động. Các ứng dụng và trang web bị loại trừ, cửa sổ riêng tư và ô mật khẩu sẽ bị bỏ qua. Tắt mục này sẽ xóa chúng.";
 "No corrections learned yet." = "Chưa học được lần sửa nào.";
 "Forget all corrections" = "Quên tất cả các lần sửa";
+"Add %lld corrections from Wispr Flow?" = "Thêm %lld lần sửa từ Wispr Flow?";
+"Add Corrections" = "Thêm các lần sửa";
+"Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out." = "Những lần sửa bạn đã làm nhiều hơn một lần trong Wispr Flow sẽ được tự động áp dụng từ bây giờ. Chỉ các cặp từ được giữ lại; các lần sửa cũ hơn 180 ngày và các lần đọc chính tả trong ứng dụng hoặc trang web bị loại trừ sẽ bị bỏ qua.";
+"Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there." = "Chọn tệp flow.sqlite của Wispr Flow. LokalBot chỉ đọc các lần đọc chính tả mà bạn đã chỉnh sửa ở đó.";
+"Wispr Flow's history has no corrections to add." = "Lịch sử Wispr Flow không có lần sửa nào để thêm.";
+"Couldn't read Wispr Flow's history." = "Không thể đọc lịch sử Wispr Flow.";

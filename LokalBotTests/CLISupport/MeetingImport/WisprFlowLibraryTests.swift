@@ -73,6 +73,55 @@ final class WisprFlowLibraryTests: XCTestCase {
         }
     }
 
+    func testEditedDictationsAreReadOldestFirstWithWhatWasPasted() throws {
+        let folder = try temporaryFolder("wispr-history")
+        let database = folder.appendingPathComponent("flow.sqlite")
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(database.path, &db), SQLITE_OK)
+        try exec(db, """
+            CREATE TABLE SequelizeMeta (name VARCHAR(255) PRIMARY KEY);
+            CREATE TABLE History (transcriptEntityId VARCHAR(36) PRIMARY KEY, asrText TEXT, formattedText TEXT,
+              editedText TEXT, pastedText TEXT, timestamp DATETIME, app VARCHAR(255), url VARCHAR(255));
+            INSERT INTO History VALUES
+              ('1', 'raw', 'Send it to Cooper Netties.', 'Send it to Kubernetes.', ' Send it to Cooper Netties.',
+               '2026-11-02 10:00:00.000 +00:00', 'com.example.notes', NULL),
+              ('2', 'raw', 'Call Novack.', 'Call Novak.', NULL, '2026-11-01 09:30:00.500 +00:00', '', 'docs.example.com'),
+              ('3', 'raw', 'Unchanged.', 'Unchanged.', NULL, '2026-11-03 08:00:00.000 +00:00', 'com.example.notes', NULL),
+              ('4', 'raw', 'Never edited.', NULL, NULL, '2026-11-03 08:00:00.000 +00:00', 'com.example.notes', NULL);
+            """)
+        sqlite3_close(db)
+
+        let edits = try WisprFlowLibrary.dictationEdits(at: folder)
+
+        XCTAssertEqual(edits.map(\.edited), ["Call Novak.", "Send it to Kubernetes."])
+        XCTAssertEqual(edits.map(\.pasted), ["Call Novack.", " Send it to Cooper Netties."], "what was pasted, if kept")
+        XCTAssertEqual(edits.map(\.bundleID), [nil, "com.example.notes"])
+        XCTAssertEqual(edits.first?.pageURL, "https://docs.example.com", "Wispr Flow keeps only the page's host")
+        XCTAssertEqual(edits.last?.pageURL, nil)
+        XCTAssertEqual(WisprFlowLibrary.pageAddress("https://example.com/a"), "https://example.com/a")
+        XCTAssertNil(WisprFlowLibrary.pageAddress("New Tab"))
+        XCTAssertEqual(edits.first?.date, Date(timeIntervalSince1970: 1_793_525_400.5))
+    }
+
+    func testAHistoryWithoutEditsIsRefusedWithoutQuotingIt() throws {
+        let folder = try temporaryFolder("wispr-history-old")
+        let database = folder.appendingPathComponent("flow.sqlite")
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(database.path, &db), SQLITE_OK)
+        try exec(db, """
+            CREATE TABLE SequelizeMeta (name VARCHAR(255) PRIMARY KEY);
+            CREATE TABLE History (transcriptEntityId VARCHAR(36) PRIMARY KEY, formattedText TEXT);
+            INSERT INTO History VALUES ('1', 'private words');
+            """)
+        sqlite3_close(db)
+        XCTAssertThrowsError(try WisprFlowLibrary.dictationEdits(at: database)) { error in
+            guard case .unreadable(_, let reason) = error as? ExternalImportError else {
+                return XCTFail("expected unreadable, got \(error)")
+            }
+            XCTAssertFalse(reason.contains("private"))
+        }
+    }
+
     func testAMissingDatabaseIsNotFound() throws {
         let folder = try temporaryFolder("wispr-empty")
         XCTAssertThrowsError(try WisprFlowLibrary.dictionary(at: folder)) { error in

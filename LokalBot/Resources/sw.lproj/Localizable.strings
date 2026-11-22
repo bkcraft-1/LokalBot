@@ -2652,3 +2652,9 @@
 "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "Unaporekebisha neno lililosikika vibaya mara tu baada ya kuamuru, katika sehemu ileile, LokalBot hukumbuka marekebisho hayo. Jozi za maneno pekee ndizo huhifadhiwa, zikiwa zimesimbwa kwenye Mac hii. Neno ulilorekebisha husaidia unukuzi unaofuata; marekebisho unayofanya mara mbili hutumika kiotomatiki. Programu na tovuti zilizotengwa, madirisha ya faragha na sehemu za nenosiri hurukwa. Kuzima hiki huyafuta.";
 "No corrections learned yet." = "Bado hakuna masahihisho yaliyojifunzwa.";
 "Forget all corrections" = "Sahau masahihisho yote";
+"Add %lld corrections from Wispr Flow?" = "Ungependa kuongeza masahihisho %lld kutoka Wispr Flow?";
+"Add Corrections" = "Ongeza masahihisho";
+"Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out." = "Masahihisho uliyofanya zaidi ya mara moja kwenye Wispr Flow yatatumika kiotomatiki kuanzia sasa. Jozi za maneno pekee ndizo huhifadhiwa; masahihisho ya zaidi ya siku 180 na imla katika programu au tovuti zilizotengwa huachwa.";
+"Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there." = "Chagua flow.sqlite ya Wispr Flow. LokalBot husoma tu imla ulizohariri hapo.";
+"Wispr Flow's history has no corrections to add." = "Historia ya Wispr Flow haina masahihisho ya kuongeza.";
+"Couldn't read Wispr Flow's history." = "Imeshindwa kusoma historia ya Wispr Flow.";

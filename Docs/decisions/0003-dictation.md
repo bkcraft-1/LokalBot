@@ -257,6 +257,13 @@ Learn from my corrections reads the pasted-into field again within 30 seconds, u
 
 Where: `LokalBot/Dictation/DictationCorrection.swift` (`DictationCorrection.pairs`, `DictationCorrection.apply`), `LokalBot/Services/PersonalModel/DictationCorrectionsStore.swift` (`DictationCorrectionsStore.swaps`), `LokalBot/Dictation/DictationCoordinator.swift` (`DictationCoordinator.watchForCorrections`).
 
+
+### Imported corrections count as fixes made on their own dates
+
+Import from Wispr Flow runs the same `DictationCorrection.pairs` over each dictation edited in Wispr Flow's history, oldest first, and records each pair with that dictation's date (`DictationCorrectionsStore.recordEarlier`), so the 180-day expiry, the cap, the twice-before-a-swap rule and a newer opposite fix apply as if the fixes had been made live. What Wispr Flow pasted is compared, not its formatted text, so its own spacing changes are not edits. A fix dated no later than the same pair's last use is skipped, so importing twice adds nothing, and an older imported fix never replaces a newer opposite one.
+
+Where: `LokalBot/Dictation/WisprCorrectionsImport.swift` (`WisprCorrectionsImport.plan`), `LokalBot/CLISupport/MeetingImport/WisprFlowLibrary.swift` (`WisprFlowLibrary.dictationEdits`), `LokalBot/Services/PersonalModel/DictationCorrectionsStore.swift` (`DictationCorrectionsStore.recordEarlier`), `LokalBot/Views/Dictation/LearnedCorrectionsSection.swift`.
+
 ## Consequences
 
 - Speech that is not a writing request stays data for a cleanup-only prompt; a change to routing, the cleanup prompt or the window-text policy needs a rerun of the replay benchmarks in `Benchmarks/transcribe/Dictation/results/`, and every path that rejects or fails a composition must still keep the transcript.

@@ -227,6 +227,12 @@
       "tests": [
         "DictationCorrectionRealDataTests/testCountsTheCorrectionsFoundInExportedEdits"
       ]
+    },
+    {
+      "reason": "Counts what an import from Wispr Flow's history would add (LOKALBOT_WISPR_DB, a copy of its flow.sqlite; LOKALBOT_CORRECTIONS_OUT to save the counts): edited dictations, fixes found, pairs kept. A measurement, run by hand; counts only.",
+      "tests": [
+        "DictationCorrectionRealDataTests/testCountsWhatAWisprFlowImportWouldAdd"
+      ]
     }
   ]
 }

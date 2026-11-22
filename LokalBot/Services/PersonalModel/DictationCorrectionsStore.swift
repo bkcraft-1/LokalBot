@@ -15,9 +15,9 @@ struct DictationLearnedCorrection: Codable, Equatable, Identifiable, Sendable {
 final class DictationCorrectionsStore: ObservableObject {
     static let fileName = "dictation-corrections.enc"
     static let keychainAccount = "dictation-corrections-key"
-    static let maxEntries = 200
-    static let retention: TimeInterval = 180 * 24 * 60 * 60
-    static let swapThreshold = 2
+    nonisolated static let maxEntries = 200
+    nonisolated static let retention: TimeInterval = 180 * 24 * 60 * 60
+    nonisolated static let swapThreshold = 2
 
     @Published private(set) var corrections: [DictationLearnedCorrection] = []
 
@@ -61,24 +61,47 @@ final class DictationCorrectionsStore: ObservableObject {
         guard !pairs.isEmpty else { return }
         load()
         let date = now()
-        for pair in pairs {
-            corrections.removeAll {
-                $0.heard.lowercased() == pair.corrected.lowercased() && $0.corrected.lowercased() == pair.heard.lowercased()
-            }
-            if let index = corrections.firstIndex(where: {
-                $0.heard.lowercased() == pair.heard.lowercased() && $0.corrected == pair.corrected
-            }) {
-                corrections[index].count += 1
-                corrections[index].swappable = pair.swappable
-                corrections[index].lastSeen = date
-            } else {
-                corrections.append(DictationLearnedCorrection(
-                    id: UUID(), heard: pair.heard, corrected: pair.corrected, count: 1, swappable: pair.swappable,
-                    firstSeen: date, lastSeen: date))
-            }
+        for pair in pairs { add(pair, at: date) }
+        prune()
+        save()
+    }
+
+    @discardableResult
+    func recordEarlier(_ seen: [(pair: DictationCorrectionPair, date: Date)]) -> Int {
+        guard !seen.isEmpty else { return 0 }
+        load()
+        var added = 0
+        for (pair, date) in seen.sorted(by: { $0.date < $1.date }) {
+            guard !corrections.contains(where: { Self.isOpposite($0, pair) && $0.lastSeen >= date }),
+                  !corrections.contains(where: { Self.isSame($0, pair) && $0.lastSeen >= date }) else { continue }
+            add(pair, at: date)
+            added += 1
         }
         prune()
         save()
+        return added
+    }
+
+    private func add(_ pair: DictationCorrectionPair, at date: Date) {
+        corrections.removeAll { Self.isOpposite($0, pair) }
+        if let index = corrections.firstIndex(where: { Self.isSame($0, pair) }) {
+            corrections[index].count += 1
+            corrections[index].swappable = pair.swappable
+            corrections[index].lastSeen = date
+        } else {
+            corrections.append(DictationLearnedCorrection(
+                id: UUID(), heard: pair.heard, corrected: pair.corrected, count: 1, swappable: pair.swappable,
+                firstSeen: date, lastSeen: date))
+        }
+    }
+
+    private static func isSame(_ correction: DictationLearnedCorrection, _ pair: DictationCorrectionPair) -> Bool {
+        correction.heard.lowercased() == pair.heard.lowercased() && correction.corrected == pair.corrected
+    }
+
+    private static func isOpposite(_ correction: DictationLearnedCorrection, _ pair: DictationCorrectionPair) -> Bool {
+        correction.heard.lowercased() == pair.corrected.lowercased()
+            && correction.corrected.lowercased() == pair.heard.lowercased()
     }
 
     func delete(_ id: UUID) {

@@ -2652,3 +2652,9 @@
 "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "عندما تصحّح كلمة أُسيء فهمها مباشرةً بعد الإملاء، في الحقل نفسه، يتذكّر LokalBot التصحيح. لا يُحفظ سوى أزواج الكلمات، مشفّرةً على هذا الـMac. تساعد الكلمة المصحَّحة في النسخ التالي، ويُطبَّق التصحيح الذي تكرّره مرتين تلقائيًا. يتم تخطّي التطبيقات والمواقع المستثناة والنوافذ الخاصة وحقول كلمات المرور. يؤدي إيقاف هذا الخيار إلى حذفها.";
 "No corrections learned yet." = "لم يتم تعلّم أي تصحيحات بعد.";
 "Forget all corrections" = "نسيان كل التصحيحات";
+"Add %lld corrections from Wispr Flow?" = "هل تريد إضافة %lld من التصحيحات من Wispr Flow؟";
+"Add Corrections" = "إضافة التصحيحات";
+"Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out." = "التصحيحات التي أجريتها أكثر من مرة في Wispr Flow ستُطبَّق تلقائيًا من الآن فصاعدًا. تُحفظ أزواج الكلمات فقط؛ وتُستبعد التصحيحات الأقدم من 180 يومًا والإملاءات في التطبيقات أو المواقع المستثناة.";
+"Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there." = "اختر ملف flow.sqlite الخاص بـ Wispr Flow. يقرأ LokalBot فقط الإملاءات التي عدّلتها هناك.";
+"Wispr Flow's history has no corrections to add." = "لا يحتوي سجل Wispr Flow على تصحيحات لإضافتها.";
+"Couldn't read Wispr Flow's history." = "تعذرت قراءة سجل Wispr Flow.";

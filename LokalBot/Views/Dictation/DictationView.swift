@@ -20,7 +20,8 @@ struct DictationSettingsSections: View {
             case .dictationRecent: recentSection
             case .dictationCorrections:
                 LearnedCorrectionsSection(isOn: $app.settings.dictationLearnFromCorrections,
-                                          store: app.dictationCorrections, focusedSettingID: app.focusedSettingID)
+                                          store: app.dictationCorrections, settings: app.settings,
+                                          focusedSettingID: app.focusedSettingID)
             default: mainSections
             }
         }

@@ -2652,3 +2652,9 @@
 "When you fix a misheard word right after dictating, in the same field, LokalBot remembers the fix. Only the word pairs are kept, encrypted on this Mac. A word you fixed helps the next transcription; a fix you make twice is applied automatically. Excluded apps and websites, private windows, and password fields are skipped. Turning this off deletes them." = "When you fix word wey e hear wrong sharp-sharp after you dictate, for the same field, LokalBot go remember the fix. Na only the word pairs e dey keep, encrypted for this Mac. Word wey you fix go help the next transcription; fix wey you do two times go dey apply by itself. E dey skip apps and websites wey you exclude, private windows, and password fields. If you off am, e go delete dem.";
 "No corrections learned yet." = "E never learn any correction yet.";
 "Forget all corrections" = "Forget all the correction dem";
+"Add %lld corrections from Wispr Flow?" = "You wan add %lld correction from Wispr Flow?";
+"Add Corrections" = "Add the correction dem";
+"Fixes you made more than once in Wispr Flow are applied automatically from now on. Only the word pairs are kept; fixes older than 180 days and dictations in excluded apps or websites are left out." = "Fix wey you don do pass one time for Wispr Flow go dey apply by itself from now. Na only the word pairs e dey keep; fix wey old pass 180 days and dictation for apps or websites wey you exclude, e no go carry dem.";
+"Choose Wispr Flow's flow.sqlite. LokalBot reads only the dictations you edited there." = "Choose Wispr Flow flow.sqlite. LokalBot go read only the dictation wey you edit for there.";
+"Wispr Flow's history has no corrections to add." = "Wispr Flow history no get any correction to add.";
+"Couldn't read Wispr Flow's history." = "We no fit read Wispr Flow history.";
