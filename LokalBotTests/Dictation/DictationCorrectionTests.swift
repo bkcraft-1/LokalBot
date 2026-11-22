@@ -22,6 +22,14 @@ final class DictationCorrectionTests: XCTestCase {
             [DictationCorrectionPair(heard: "Novack", corrected: "Novak")])
     }
 
+    func testTheSameFixTwiceInOneDictationCountsOnce() {
+        XCTAssertEqual(
+            pairs("Send it to Novack today and ask Novack about the rollout next week.",
+                  "Send it to Novak today and ask Novak about the rollout next week."),
+            [DictationCorrectionPair(heard: "Novack", corrected: "Novak")],
+            "one dictation is one fix, so it can't turn into an automatic swap by itself")
+    }
+
     func testEditsThatAreNotMishearingsAreIgnored() {
         XCTAssertEqual(pairs("Send it to mila today please", "Send it to Mila today, please."), [], "case only")
         XCTAssertEqual(pairs("We meet on Monday next week", "We meet on Friday next week"), [], "a different word, not a sound-alike")

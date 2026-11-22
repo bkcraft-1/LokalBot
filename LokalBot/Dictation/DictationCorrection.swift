@@ -35,7 +35,8 @@ enum DictationCorrection {
             let written = Array(field[(previous.1 + 1)..<match.1])
             guard !heard.isEmpty, !written.isEmpty else { continue }
             guard heard.count <= maxWordsPerSide, written.count <= maxWordsPerSide else { return [] }
-            if let pair = correction(heard: heard, written: written, isEverydayWord: isEverydayWord) {
+            if let pair = correction(heard: heard, written: written, isEverydayWord: isEverydayWord),
+               !found.contains(where: { $0.heard.lowercased() == pair.heard.lowercased() && $0.corrected == pair.corrected }) {
                 found.append(pair)
             }
         }
