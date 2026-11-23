@@ -1404,9 +1404,20 @@ final class DictationCoordinator: ObservableObject {
     private func runWarmCleanupLoop(audioURL: URL, config: AppSettings, generation session: Int) async {
         var cleaned = ""
         var passes = 0
+        var stage = DictationWarmCleanup.Stage.waiting
+        var stageStarted = ContinuousClock.now
+        func logRelease() {
+            let elapsed = ContinuousClock.now - stageStarted
+            if let line = DictationWarmCleanup.releaseLogLine(
+                stage: stage, passes: passes,
+                elapsed: Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18) {
+                lokalbotLog(line)
+            }
+        }
         let scratch = storageRoot.appendingPathComponent(Self.previewScratchDirectoryName, isDirectory: true)
         while !Task.isCancelled {
             do {
+                stage = .waiting
                 try await Task.sleep(for: DictationWarmCleanup.interval)
                 guard generation == session, state.isRecording else { return }
                 try FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
@@ -1417,19 +1428,28 @@ final class DictationCoordinator: ObservableObject {
                     try DictationWarmCleanup.copy(of: audioURL, to: copy)
                 }.value
                 let started = ContinuousClock.now
+                stage = .speech
+                stageStarted = started
                 let transcript = try await transcribeSerialized(copy, config: config)
                 let text = Transcript.normalizedText(transcript.segments.map(\.displayText).joined(separator: " "))
                 try Task.checkCancellation()
-                guard generation == session, state.isRecording else { return }
+                guard generation == session, state.isRecording else {
+                    logRelease()
+                    return
+                }
                 guard DictationWarmCleanup.shouldClean(text, after: cleaned) else { continue }
+                stage = .cleanup
+                stageStarted = ContinuousClock.now
                 _ = try await DictationTextPreparation.prepare(
                     speech: text, settings: config, screenContext: { nil }, makeEngine: makeTextEngine)
+                stage = .waiting
                 cleaned = text
                 passes += 1
                 let elapsed = ContinuousClock.now - started
                 lokalbotLog("dictation warm cleanup pass=\(passes) words=\(text.split(separator: " ").count) elapsed="
                     + String(format: "%.2f", Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18))
             } catch is CancellationError {
+                logRelease()
                 return
             } catch DictationError.noAudio {
                 continue
@@ -1438,7 +1458,10 @@ final class DictationCoordinator: ObservableObject {
             } catch is DictationWarmCleanup.CopyError {
                 continue
             } catch {
-                if Task.isCancelled { return }
+                if Task.isCancelled {
+                    logRelease()
+                    return
+                }
                 lokalbotLog("dictation warm cleanup skipped: \(error.localizedDescription)")
             }
         }

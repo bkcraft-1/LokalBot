@@ -29,6 +29,14 @@ final class DictationWarmCleanupTests: XCTestCase {
             "a writing request reads context, which a warm-up never does")
     }
 
+    func testLogsAReleaseOnlyWhileAPassIsRunning() {
+        XCTAssertNil(DictationWarmCleanup.releaseLogLine(stage: .waiting, passes: 3, elapsed: 4.2))
+        XCTAssertEqual(DictationWarmCleanup.releaseLogLine(stage: .cleanup, passes: 3, elapsed: 0.139),
+                       "dictation warm cleanup released in flight stage=cleanup after=0.14 completed=3")
+        XCTAssertEqual(DictationWarmCleanup.releaseLogLine(stage: .speech, passes: 0, elapsed: 0.3),
+                       "dictation warm cleanup released in flight stage=speech after=0.30 completed=0")
+    }
+
     func testTheMainServerSpeculatesOnlyWhenSwitchedOn() {
         XCTAssertEqual(MainLLMRuntimePolicy.serverExtraArguments(warmCleanup: false), ["--cache-ram", "2048", "--reasoning", "on"])
         XCTAssertEqual(MainLLMRuntimePolicy.serverExtraArguments(warmCleanup: true),

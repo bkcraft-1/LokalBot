@@ -22,6 +22,16 @@ enum DictationWarmCleanup {
             && !DictationGrounding.requestsContext(text)
     }
 
+    /// What the loop was doing when the dictation ended.
+    enum Stage: String { case waiting, speech, cleanup }
+
+    /// The log line for a dictation that ended while a warm-up pass was running; nil between passes.
+    static func releaseLogLine(stage: Stage, passes: Int, elapsed: Double) -> String? {
+        guard stage != .waiting else { return nil }
+        return "dictation warm cleanup released in flight stage=\(stage.rawValue) after="
+            + String(format: "%.2f", elapsed) + " completed=\(passes)"
+    }
+
     enum CopyError: Error { case unreadable }
 
     static func copy(of audio: URL, frames limit: AVAudioFramePosition? = nil, to url: URL) throws {
