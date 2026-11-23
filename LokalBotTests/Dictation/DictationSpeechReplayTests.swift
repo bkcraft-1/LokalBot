@@ -13,6 +13,12 @@ final class DictationSpeechReplayTests: XCTestCase {
                              passes: 10))
     }
 
+    func testPreviewIsOffUnlessAsked() {
+        let base = ["LokalBot", "--dictation-speech-replay", "/tmp/cases.json", "--model", "parakeet-v3"]
+        XCTAssertEqual(DictationSpeechReplay.parse(base)?.preview, false)
+        XCTAssertEqual(DictationSpeechReplay.parse(base + ["--preview"])?.preview, true)
+    }
+
     func testRefusesRemoteServersAndUnknownModels() {
         XCTAssertNil(DictationSpeechReplay.parse(["LokalBot", "--dictation-speech-replay", "/tmp/c.json",
                                                   "--model", TranscriptionModelChoice.remoteServer.rawValue]))

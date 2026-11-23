@@ -6,6 +6,7 @@ enum DictationSpeechReplay {
         var model: TranscriptionModelChoice
         var language: TranscriptionLanguage
         var passes: Int
+        var preview = false
     }
 
     struct Input: Decodable {
@@ -22,6 +23,7 @@ enum DictationSpeechReplay {
         var pass: Int
         var seconds: Double
         var text: String
+        var ticks: [DictationCoordinator.PreviewTick]?
     }
 
     static func parse(_ args: [String]) -> Request? {
@@ -34,7 +36,7 @@ enum DictationSpeechReplay {
         let passes = args.firstIndex(of: "--passes")
             .flatMap { args.count > $0 + 1 ? Int(args[$0 + 1]) : nil } ?? 3
         return Request(input: URL(fileURLWithPath: args[flag + 1]), model: model, language: language,
-                       passes: min(max(passes, 1), 10))
+                       passes: min(max(passes, 1), 10), preview: args.contains("--preview"))
     }
 
     static func order(count: Int, pass: Int) -> [Int] {
@@ -64,15 +66,22 @@ enum DictationSpeechReplay {
             _ = try await DictationCoordinator.transcribe(
                 folder.appendingPathComponent(input.cases[0].audio), config: config, retriesWithoutVocabulary: false)
             try write(["warmupSeconds": seconds(ContinuousClock.now - warmup)])
+            let scratch = FileManager.default.temporaryDirectory
+                .appendingPathComponent("lokalbot-speech-replay-\(UUID().uuidString)", isDirectory: true)
+            defer { try? FileManager.default.removeItem(at: scratch) }
             for pass in 0..<request.passes {
                 for index in order(count: input.cases.count, pass: pass) {
                     let item = input.cases[index]
+                    let ticks = request.preview && pass == 0
+                        ? try await DictationCoordinator.replayedPreview(
+                            of: folder.appendingPathComponent(item.audio), config: config, storageRoot: scratch)
+                        : nil
                     let start = ContinuousClock.now
                     let transcript = try await DictationCoordinator.transcribe(
                         folder.appendingPathComponent(item.audio), config: config, retriesWithoutVocabulary: false)
                     let observation = Observation(
                         id: item.id, pass: pass, seconds: seconds(ContinuousClock.now - start),
-                        text: transcript.segments.map(\.displayText).joined(separator: " "))
+                        text: transcript.segments.map(\.displayText).joined(separator: " "), ticks: ticks)
                     try FileHandle.standardOutput.write(contentsOf: encoder.encode(observation) + Data([10]))
                 }
             }

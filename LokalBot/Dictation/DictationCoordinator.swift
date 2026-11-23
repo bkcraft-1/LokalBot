@@ -1399,6 +1399,48 @@ final class DictationCoordinator: ObservableObject {
         min(4.0, max(1.4, duration / 8.0))
     }
 
+    struct PreviewTick: Encodable, Equatable, Sendable {
+        var at: Double
+        var text: String
+    }
+
+    static func replayedPreview(of audioURL: URL, config: AppSettings, storageRoot: URL) async throws -> [PreviewTick] {
+        let reader = try AVAudioFile(forReading: audioURL)
+        let total = Double(reader.length) / max(reader.processingFormat.sampleRate, 1)
+        var ticks: [PreviewTick] = []
+        var clock = 1.2
+        var lastPreviewed: TimeInterval = 0
+        var accumulated = ""
+        while clock < total {
+            let minimumAdvance = clock < 10 ? 1.25 : 2.0
+            guard clock >= 1.25, clock - lastPreviewed >= minimumAdvance else {
+                clock += 0.45
+                continue
+            }
+            let recorded = clock
+            let window = try makeIncrementalLivePreviewWindowSynchronously(
+                from: audioURL, storageRoot: storageRoot, previousEnd: lastPreviewed, recordedSoFar: recorded)
+            defer { try? FileManager.default.removeItem(at: window.url) }
+            let started = ContinuousClock.now
+            do {
+                let transcript = try await transcribe(window.url, config: config, retriesWithoutVocabulary: false)
+                let text = Transcript.normalizedText(transcript.segments.map(\.displayText).joined(separator: " "))
+                if !text.isEmpty {
+                    accumulated = window.startTime == 0
+                        ? text : DictationPreviewTextStitcher.stitch(previous: accumulated, incoming: text)
+                }
+            } catch DictationError.noAudio {
+            } catch DictationError.noSpeech {
+            }
+            lastPreviewed = window.endTime
+            let elapsed = ContinuousClock.now - started
+            clock += Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18
+            if !accumulated.isEmpty, ticks.last?.text != accumulated { ticks.append(.init(at: clock, text: accumulated)) }
+            clock += livePreviewInterval(after: recorded)
+        }
+        return ticks
+    }
+
     nonisolated static let previewScratchDirectoryName = "dictation-previews"
 
     nonisolated static func sweepOrphanedPreviewFiles(storageRoot: URL) {
@@ -1428,12 +1470,13 @@ final class DictationCoordinator: ObservableObject {
     private nonisolated static func makeIncrementalLivePreviewWindowSynchronously(
         from audioURL: URL,
         storageRoot: URL,
-        previousEnd: TimeInterval
+        previousEnd: TimeInterval,
+        recordedSoFar: TimeInterval? = nil
     ) throws -> IncrementalLivePreviewWindow {
         let reader = try AVAudioFile(forReading: audioURL)
         let format = reader.processingFormat
         guard format.sampleRate > 0 else { throw DictationError.noAudio }
-        let currentEnd = Double(reader.length) / format.sampleRate
+        let currentEnd = min(Double(reader.length) / format.sampleRate, recordedSoFar ?? .infinity)
         guard let range = DictationPreviewWindowPlanner.range(
             previousEnd: previousEnd,
             currentEnd: currentEnd) else {
