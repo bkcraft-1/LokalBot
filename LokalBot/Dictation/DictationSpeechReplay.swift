@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 
 enum DictationSpeechReplay {
@@ -7,6 +8,7 @@ enum DictationSpeechReplay {
         var language: TranscriptionLanguage
         var passes: Int
         var preview = false
+        var prefixEvery: Double?
     }
 
     struct Input: Decodable {
@@ -24,6 +26,13 @@ enum DictationSpeechReplay {
         var seconds: Double
         var text: String
         var ticks: [DictationCoordinator.PreviewTick]?
+        var prefixes: [Prefix]?
+    }
+
+    struct Prefix: Encodable, Equatable {
+        var audioSeconds: Double
+        var seconds: Double
+        var text: String
     }
 
     static func parse(_ args: [String]) -> Request? {
@@ -36,7 +45,9 @@ enum DictationSpeechReplay {
         let passes = args.firstIndex(of: "--passes")
             .flatMap { args.count > $0 + 1 ? Int(args[$0 + 1]) : nil } ?? 3
         return Request(input: URL(fileURLWithPath: args[flag + 1]), model: model, language: language,
-                       passes: min(max(passes, 1), 10), preview: args.contains("--preview"))
+                       passes: min(max(passes, 1), 10), preview: args.contains("--preview"),
+                       prefixEvery: args.firstIndex(of: "--prefix-every")
+                           .flatMap { args.count > $0 + 1 ? Double(args[$0 + 1]) : nil }.map { min(max($0, 1), 60) })
     }
 
     static func order(count: Int, pass: Int) -> [Int] {
@@ -76,12 +87,18 @@ enum DictationSpeechReplay {
                         ? try await DictationCoordinator.replayedPreview(
                             of: folder.appendingPathComponent(item.audio), config: config, storageRoot: scratch)
                         : nil
+                    let prefixes = pass == 0
+                        ? try await request.prefixEvery.asyncMap {
+                            try await Self.prefixes(of: folder.appendingPathComponent(item.audio), every: $0,
+                                                    config: config, scratch: scratch)
+                        }
+                        : nil
                     let start = ContinuousClock.now
                     let transcript = try await DictationCoordinator.transcribe(
                         folder.appendingPathComponent(item.audio), config: config, retriesWithoutVocabulary: false)
                     let observation = Observation(
                         id: item.id, pass: pass, seconds: seconds(ContinuousClock.now - start),
-                        text: transcript.segments.map(\.displayText).joined(separator: " "), ticks: ticks)
+                        text: transcript.segments.map(\.displayText).joined(separator: " "), ticks: ticks, prefixes: prefixes)
                     try FileHandle.standardOutput.write(contentsOf: encoder.encode(observation) + Data([10]))
                 }
             }
@@ -89,6 +106,42 @@ enum DictationSpeechReplay {
         } catch {
             try? FileHandle.standardError.write(contentsOf: Data("Dictation speech replay failed: \(error)\n".utf8))
             return 1
+        }
+    }
+
+    @MainActor
+    static func prefixes(of audio: URL, every step: Double, config: AppSettings, scratch: URL) async throws -> [Prefix] {
+        let reader = try AVAudioFile(forReading: audio)
+        let format = reader.processingFormat
+        let total = Double(reader.length) / max(format.sampleRate, 1)
+        try FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
+        var result: [Prefix] = []
+        var end = step
+        while end < total {
+            let url = scratch.appendingPathComponent("prefix-\(UUID().uuidString).\(audio.pathExtension)")
+            defer { try? FileManager.default.removeItem(at: url) }
+            try copy(reader, frames: AVAudioFramePosition(end * format.sampleRate), to: url)
+            let start = ContinuousClock.now
+            let text = (try? await DictationCoordinator.transcribe(url, config: config, retriesWithoutVocabulary: false))
+                .map { $0.segments.map(\.displayText).joined(separator: " ") } ?? ""
+            result.append(Prefix(audioSeconds: end, seconds: seconds(ContinuousClock.now - start), text: text))
+            end += step
+        }
+        return result
+    }
+
+    private static func copy(_ reader: AVAudioFile, frames: AVAudioFramePosition, to url: URL) throws {
+        let format = reader.processingFormat
+        let writer = try AVAudioFile(forWriting: url, settings: reader.fileFormat.settings,
+                                     commonFormat: format.commonFormat, interleaved: format.isInterleaved)
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 16_384) else { throw ReplayError.invalidInput }
+        reader.framePosition = 0
+        var remaining = min(frames, reader.length)
+        while remaining > 0 {
+            try reader.read(into: buffer, frameCount: AVAudioFrameCount(min(remaining, 16_384)))
+            guard buffer.frameLength > 0 else { break }
+            try writer.write(from: buffer)
+            remaining -= AVAudioFramePosition(buffer.frameLength)
         }
     }
 
@@ -101,5 +154,12 @@ enum DictationSpeechReplay {
     private static func write(_ value: [String: Double]) throws {
         let data = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
         try FileHandle.standardOutput.write(contentsOf: data + Data([10]))
+    }
+}
+
+private extension Optional {
+    func asyncMap<T>(_ transform: (Wrapped) async throws -> T) async rethrows -> T? {
+        guard let self else { return nil }
+        return try await transform(self)
     }
 }
