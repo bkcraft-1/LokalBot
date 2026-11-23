@@ -1442,6 +1442,7 @@ final class DictationCoordinator: ObservableObject {
                 stageStarted = ContinuousClock.now
                 _ = try await DictationTextPreparation.prepare(
                     speech: text, settings: config, screenContext: { nil }, makeEngine: makeTextEngine)
+                try Task.checkCancellation()
                 stage = .waiting
                 cleaned = text
                 passes += 1
