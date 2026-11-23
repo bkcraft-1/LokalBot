@@ -13,6 +13,7 @@ CONFIGS = {
     'qwen-en': ('qwen3-asr-1.7b', 'en'),
     'parakeet-v3': ('parakeet-v3', 'auto'),
     'parakeet-ultra': ('parakeet-ultra', 'auto'),
+    'parakeet-v2': ('parakeet-v2', 'auto'),
 }
 DEFAULT_ORDER = ['qwen-auto', 'parakeet-v3', 'parakeet-ultra', 'qwen-en', 'qwen-auto-last']
 MODEL_FOLDERS = ['me.dotenv.LokalBot.dev/qwen3-asr-models', 'FluidAudio/Models']
@@ -30,6 +31,8 @@ def main():
     parser.add_argument('--root', type=Path, required=True, help='a disposable home for the app')
     parser.add_argument('--configs', nargs='+', default=DEFAULT_ORDER)
     parser.add_argument('--passes', type=int, default=3)
+    parser.add_argument('--preview', action='store_true',
+                        help='also record the live preview text at each tick, as shown while speaking')
     args = parser.parse_args()
     home = args.root / 'home'
     support = home / 'Library' / 'Application Support'
@@ -45,6 +48,8 @@ def main():
         folder.mkdir(parents=True, exist_ok=True)
         command = [str(binary), '--dictation-speech-replay', str(args.cases.resolve()), '--model', model,
                    '--language', language, '--passes', str(args.passes)]
+        if args.preview:
+            command.append('--preview')
         env = dict(os.environ, CFFIXED_USER_HOME=str(home), LOKALBOT_STORAGE_ROOT=str(args.root / 'storage'),
                    LOKALBOT_DEFAULTS_SUITE='me.dotenv.LokalBot.speech-replay.' + uuid.uuid4().hex)
         started = time.time()
