@@ -120,7 +120,7 @@ enum DictationSpeechReplay {
         while end < total {
             let url = scratch.appendingPathComponent("prefix-\(UUID().uuidString).\(audio.pathExtension)")
             defer { try? FileManager.default.removeItem(at: url) }
-            try copy(reader, frames: AVAudioFramePosition(end * format.sampleRate), to: url)
+            try DictationWarmCleanup.copy(of: audio, frames: AVAudioFramePosition(end * format.sampleRate), to: url)
             let start = ContinuousClock.now
             let text = (try? await DictationCoordinator.transcribe(url, config: config, retriesWithoutVocabulary: false))
                 .map { $0.segments.map(\.displayText).joined(separator: " ") } ?? ""
@@ -128,21 +128,6 @@ enum DictationSpeechReplay {
             end += step
         }
         return result
-    }
-
-    private static func copy(_ reader: AVAudioFile, frames: AVAudioFramePosition, to url: URL) throws {
-        let format = reader.processingFormat
-        let writer = try AVAudioFile(forWriting: url, settings: reader.fileFormat.settings,
-                                     commonFormat: format.commonFormat, interleaved: format.isInterleaved)
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 16_384) else { throw ReplayError.invalidInput }
-        reader.framePosition = 0
-        var remaining = min(frames, reader.length)
-        while remaining > 0 {
-            try reader.read(into: buffer, frameCount: AVAudioFrameCount(min(remaining, 16_384)))
-            guard buffer.frameLength > 0 else { break }
-            try writer.write(from: buffer)
-            remaining -= AVAudioFramePosition(buffer.frameLength)
-        }
     }
 
     private enum ReplayError: Error { case invalidInput }

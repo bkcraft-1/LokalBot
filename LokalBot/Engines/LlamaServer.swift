@@ -4,10 +4,11 @@ import Darwin
 enum MainLLMRuntimePolicy {
     static let contextTokens = 32_768
     static let highReasoningBudgetTokens = 8_192
-    static let serverExtraArguments = [
-        "--cache-ram", "2048",
-        "--reasoning", "on",
-    ]
+    static let serverExtraArguments = serverExtraArguments(warmCleanup: DictationWarmCleanup.isEnabled)
+
+    static func serverExtraArguments(warmCleanup: Bool) -> [String] {
+        ["--cache-ram", "2048", "--reasoning", "on"] + (warmCleanup ? DictationWarmCleanup.speculationArguments : [])
+    }
 
     static func requestOverrides(for modelID: String) -> [String: Any] {
         switch modelID {

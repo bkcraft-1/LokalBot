@@ -85,6 +85,7 @@ final class DictationCoordinator: ObservableObject {
     private var startTask: Task<Void, Never>?
     private var startTaskGeneration: Int?
     private var livePreviewTask: Task<Void, Never>?
+    private var warmCleanupTask: Task<Void, Never>?
     private var asrHandoffTask: Task<Void, Never>?
     private var livePreviewTaskID = 0
     private var transcribeTask: Task<Void, Never>?
@@ -490,6 +491,7 @@ final class DictationCoordinator: ObservableObject {
                 self.refreshOverlay()
                 self.prewarmSelectedModel(reason: source)
                 self.startLivePreviewIfNeeded(audioURL: audioURL, config: config, generation: session)
+                self.startWarmCleanupIfNeeded(audioURL: audioURL, config: config, generation: session)
                 if focusCapture.timedOut, outputMode == .pasteIntoFocusedApp {
                     self.bindLateDeliveryTarget(
                         fullFocusCapture,
@@ -1379,12 +1381,66 @@ final class DictationCoordinator: ObservableObject {
     }
 
     private func cancelLivePreview(reset: Bool) {
+        warmCleanupTask?.cancel()
+        warmCleanupTask = nil
         livePreviewTaskID += 1
         livePreviewTask?.cancel()
         livePreviewTask = nil
         isLivePreviewWorking = false
         if reset {
             resetLivePreview()
+        }
+    }
+
+    private func startWarmCleanupIfNeeded(audioURL: URL, config: AppSettings, generation session: Int) {
+        warmCleanupTask?.cancel()
+        warmCleanupTask = nil
+        guard DictationWarmCleanup.applies(config) else { return }
+        warmCleanupTask = Task { [weak self] in
+            await self?.runWarmCleanupLoop(audioURL: audioURL, config: config, generation: session)
+        }
+    }
+
+    private func runWarmCleanupLoop(audioURL: URL, config: AppSettings, generation session: Int) async {
+        var cleaned = ""
+        var passes = 0
+        let scratch = storageRoot.appendingPathComponent(Self.previewScratchDirectoryName, isDirectory: true)
+        while !Task.isCancelled {
+            do {
+                try await Task.sleep(for: DictationWarmCleanup.interval)
+                guard generation == session, state.isRecording else { return }
+                try FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
+                let ext = audioURL.pathExtension.isEmpty ? "caf" : audioURL.pathExtension
+                let copy = scratch.appendingPathComponent("dictation-warm-\(UUID().uuidString).\(ext)")
+                defer { try? FileManager.default.removeItem(at: copy) }
+                try await Task.detached(priority: .utility) {
+                    try DictationWarmCleanup.copy(of: audioURL, to: copy)
+                }.value
+                let started = ContinuousClock.now
+                let transcript = try await transcribeSerialized(copy, config: config)
+                let text = Transcript.normalizedText(transcript.segments.map(\.displayText).joined(separator: " "))
+                try Task.checkCancellation()
+                guard generation == session, state.isRecording else { return }
+                guard DictationWarmCleanup.shouldClean(text, after: cleaned) else { continue }
+                _ = try await DictationTextPreparation.prepare(
+                    speech: text, settings: config, screenContext: { nil }, makeEngine: makeTextEngine)
+                cleaned = text
+                passes += 1
+                let elapsed = ContinuousClock.now - started
+                lokalbotLog("dictation warm cleanup pass=\(passes) words=\(text.split(separator: " ").count) elapsed="
+                    + String(format: "%.2f", Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18))
+            } catch is CancellationError {
+                return
+            } catch DictationError.noAudio {
+                continue
+            } catch DictationError.noSpeech {
+                continue
+            } catch is DictationWarmCleanup.CopyError {
+                continue
+            } catch {
+                if Task.isCancelled { return }
+                lokalbotLog("dictation warm cleanup skipped: \(error.localizedDescription)")
+            }
         }
     }
 
